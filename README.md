@@ -24,5 +24,6 @@ We are using [shot](https://www.npmjs.com/package/shot) to inject requests to th
  * As a user I would like to delete a post
 
 ## TESTING HTML AND JSON
- * We need to test that a client request(GET, POST, DELETE) is met with a successful response, however it is trickier to extract the data we want to check from html than JSON.  Therefore, it may be easier to test that the content of a server rendered page contains what we expect it to by looking at the data in it's json form.
+ * We need to test that a client request(GET, POST, DELETE) is met with a successful response, however it is trickier to extract the data we want to check from html than JSON.  
+ * Therefore, it may be easier to test that the content of a server rendered page contains what we expect it to by looking at the data in it's json form.
  
