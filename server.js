@@ -2,7 +2,6 @@ var http = require("http");
 var handler = require("./handler");
 var port = 4000;
 
-
 //*** List of Routes and Associated Handler Functions ***//
 var routes = {};
 routes["/"] = handler.home; 
@@ -34,3 +33,4 @@ var router = function(req, res){
 http.createServer(router).listen(port);
 
 console.log('Server running on port', port);
+
