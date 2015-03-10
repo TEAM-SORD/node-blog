@@ -7,8 +7,12 @@
     "test": "test"
   },
   "dependencies": {
+    "fs": "0.0.2",
+    "jade": "^1.9.2",
     "mongoose": "^3.8.24",
-    "shot": "^1.4.2"
+    "querystring": "^0.2.0",
+    "shot": "^1.4.2",
+    "util": "^0.10.3"
   },
   "devDependencies": {
     "mocha": "^2.2.0",

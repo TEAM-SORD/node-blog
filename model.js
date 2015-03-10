@@ -3,9 +3,8 @@ var mongoose = require("mongoose");
 var http = require("http");
 var url = require("url");
 var fs = require("fs");
-var ecstatic = require("ecstatic")({root: __dirname + "/public"});
 
-mongoose.connect("mongodb://127.0.0.1:27017/blogposts");
+mongoose.connect("mongodb://127.0.0.1:27017/blogpostdb");
 
 // Get notification for connection success or failure \\
 var db = mongoose.connection;
@@ -31,36 +30,53 @@ blogSchema.methods.announce = function() {
 
 // Compile schema into a model, which defines the database collection \\
 // First argument is collection name, second argument is schema name  \\
-var blogPost = mongoose.model("blogpost", blogSchema);
+var blogPostModel = mongoose.model("blogpost", blogSchema);
+
+
+
+
+module.exports = {
+
+	getPosts : function( searchCriteria, doSomethingWithResults ) {
+	    return blogPostModel.find();/*function(err, blogPosts) {
+			console.log( 'In blogPostModel : ' + blogPosts);
+			if( err ) {
+				console.log( 'Error: ' + err );
+			}
+			doSomethingWithResults( blogPosts );
+		});*/
+
+	},
+	addPost  : function( newPost, successCB ) {
+		var post = new blogPostModel(newPost);
+		console.log( 'Post model: ' + post );
+		post.save(function (err) {
+		  if (err) {
+		  	console.log( 'Error: ' + err );
+		  } 
+		  console.log( 'Saved to the collection!');
+		  successCB( err );
+		});
+	},
+	updatePost : function( post ) {
+
+	},
+	deletePost : function( post ) {
+
+	}
+};
 
 // Example blog post \\
-var testPost = new blogPost({ author : "bob smith",
-							   title : "read these words", 
-							   	text : "this is some informatioon about an interesting topic of my choice",
-							    date : "new data object",
-							   image : "img src ='www.google.com/images/pineapple"
-							});
+// var testPost = new blogPostModel({ author : "bob smith",
+// 							   title : "read these words", 
+// 							   	text : "this is some informatioon about an interesting topic of my choice",
+// 							    date : "new data object",
+// 							   image : "img src ='www.google.com/images/pineapple"
+// 							});
 
-// Saves submitted blog post to database and displays a message confirming \\
-testPost.save(function(err, testPost){
-	if (err) return console.error(err);
-	testPost.announce();
-});
+// // Saves submitted blog post to database and displays a message confirming \\
+// testPost.save(function(err, testPost){
+// 	if (err) return console.error(err);
+// 	testPost.announce();
+// });
 
-// Create http server to serve saved blogposts \\
-http.createServer(function (request, response) {
-	if (request.url === "/model") {
-		blogPost.find(function(err, blogPost) {
-			response.write(JSON.stringify(blogPost));
-			response.end();
-		});
-	} else if (request.url === "/form") {
-    	fs.readFile('index.html', function(err, page) {
-        response.writeHead(200, {'Content-Type': 'text/html'});
-        response.write(page);
-        response.end();
-    	});
-    }
-}).listen(4000);
-
-console.log("Server running at 4000");
