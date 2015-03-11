@@ -1,0 +1,9 @@
+each post in posts
+	form
+		label(class='authorlabel') Author
+			input(class='author' type='text' value='#{post.author}')
+		label(class='titlelabel') Title	
+			input(class='title' type='text' value='#{post.title}')
+		textarea(class='textarea' wrap='hard' value='#{post.text}')
+		input(class='save' type='submit' value="Save" )
+		input(class='close' type='submit' value="Close" )
