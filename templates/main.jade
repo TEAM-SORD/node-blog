@@ -1,0 +1,7 @@
+each post in posts
+	div(class="snippet")
+		div
+			a(href="editpage?id="+post.id)
+				li #{post.title} - #{post.date}
+		div
+			p #{post.text}
