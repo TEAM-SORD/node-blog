@@ -3,8 +3,12 @@ var mongoose = require("mongoose");
 var http = require("http");
 var url = require("url");
 var fs = require("fs");
+var uriUtil  = require('mongodb-uri');
 
-mongoose.connect("mongodb://127.0.0.1:27017/blogpostdb");
+var mongodbUri = 'mongodb://beechware:Pass1on8@ds039301.mongolab.com:39301/sord';
+var mongooseUri = uriUtil.formatMongoose(mongodbUri);
+
+mongoose.connect(mongooseUri);
 
 // Get notification for connection success or failure \\
 var db = mongoose.connection;
@@ -30,7 +34,9 @@ blogSchema.methods.announce = function() {
 
 // Compile schema into a model, which defines the database collection \\
 // First argument is collection name, second argument is schema name  \\
-var blogPostModel = mongoose.model("blogpost", blogSchema);
+var blogPostModel = mongoose.model("blogPosts", blogSchema);
+
+console.log( "blogPOPO" + blogPostModel);
 
 
 
@@ -38,13 +44,14 @@ var blogPostModel = mongoose.model("blogpost", blogSchema);
 module.exports = {
 
 	getPosts : function( searchCriteria, doSomethingWithResults ) {
-	    return blogPostModel.find();/*function(err, blogPosts) {
-			console.log( 'In blogPostModel : ' + blogPosts);
-			if( err ) {
-				console.log( 'Error: ' + err );
-			}
-			doSomethingWithResults( blogPosts );
-		});*/
+	    return blogPostModel.find();
+	 //    function(err, blogPosts) {
+		// 	console.log( 'In blogPostModel : ' + blogPosts);
+		// 	if( err ) {
+		// 		console.log( 'Error: ' + err );
+		// 	}
+		// 	doSomethingWithResults( blogPosts );
+		// });
 
 	},
 	addPost  : function( newPost, successCB ) {
@@ -66,17 +73,17 @@ module.exports = {
 	}
 };
 
-// Example blog post \\
-// var testPost = new blogPostModel({ author : "bob smith",
-// 							   title : "read these words", 
-// 							   	text : "this is some informatioon about an interesting topic of my choice",
-// 							    date : "new data object",
-// 							   image : "img src ='www.google.com/images/pineapple"
-// 							});
+// Example blog post 
+var testPost = new blogPostModel({ author : "bob smith",
+							   title : "read these words", 
+							   	text : "this is some informatioon about an interesting topic of my choice",
+							    date : "new data object",
+							   image : "img src ='www.google.com/images/pineapple"
+							});
 
-// // Saves submitted blog post to database and displays a message confirming \\
-// testPost.save(function(err, testPost){
-// 	if (err) return console.error(err);
-// 	testPost.announce();
-// });
+// Saves submitted blog post to database and displays a message confirming \\
+testPost.save(function(err, testPost){
+	if (err) return console.error(err);
+	testPost.announce();
+});
 
