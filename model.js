@@ -49,14 +49,7 @@ module.exports = {
 			searchCriteria = formatID( searchCriteria );
 			//collection.update({'_id': o_id});
 		}
-	    return blogPostModel.find( searchCriteria );/*function(err, blogPosts) {
-			console.log( 'In blogPostModel : ' + blogPosts);
-			if( err ) {
-				console.log( 'Error: ' + err );
-			}
-			doSomethingWithResults( blogPosts );
-		});*/
-
+	    return blogPostModel.find( searchCriteria );
 	},
 	addPost  : function( newPost, successCB ) {
 		var post = new blogPostModel(newPost);
@@ -69,8 +62,13 @@ module.exports = {
 		  successCB( err );
 		});
 	},
-	updatePost : function( post ) {
+	updatePost : function( post, successCB ) {
+		var searchCriteria = formatID( post.id );
+		var /*conditions = { _id : 'borne' },*/
+  			 update = post, /*{ $inc: { visits: 1 }}*/
+  			 options = { multi: true };
 
+			blogPostModel.update(conditions, update, options, successCB);
 	},
 	deletePost : function( post ) {
 

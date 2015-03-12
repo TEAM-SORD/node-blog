@@ -1,0 +1,7 @@
+mixin sidebar(endpoint)
+	div(class="blog-sidebar")
+		h4 Explore All Blogs
+		div(class="sidebar-module")
+			each post in postlist
+				a(href="#{endpoint}?id="+post.id)
+					li #{post.title} - #{post.date}

@@ -1,9 +1,9 @@
-each post in posts
-	form
-		label(class='authorlabel') Author
-			input(class='author' type='text' value='#{post.author}')
-		label(class='titlelabel') Title	
-			input(class='title' type='text' value='#{post.title}')
-		textarea(class='textarea' wrap='hard' value='#{post.text}')
-		input(class='save' type='submit' value="Save" )
-		input(class='close' type='submit' value="Close" )
+form(action='update', method='POST')
+	label(class='authorlabel') Author:
+		input(class='author' type='text' name='author' value='#{posts[0].author}' required)
+	label(class='titlelabel') Title:
+		input(class='title' type='text' name='title' value='#{posts[0].title}' required)
+	label(class='idlabel') Identifier:
+		input(class='id' type='text' name='id' value='#{posts[0].id}' readonly)
+	textarea(class='textarea' wrap='hard' name='text' required) #{posts[0].text}
+	input(class='save' type='submit' value="Save" )

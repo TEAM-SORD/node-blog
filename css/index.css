@@ -16,18 +16,19 @@
     height: 90%;
     width: 350px;
     float: right;
-    padding: 5px;
-    margin: 10px;	
+    margin: 5px;	
+    border-radius: 4px;
+    margin-right: 13px;
 }
 
-.main {
+
+.main, .post, .editpane {
 	font-family: 'Orbitron', Cursive, serif;
 	background-color: #EDF6F7;
     height: 90%;
-    width: 800px;
-    float: left;
-    padding: 5px;
-    margin: 10px;
+    width: 780px;
+    margin: 5px;
+    border-radius: 4px;
 }
 
 .textarea{
@@ -51,3 +52,12 @@
     clear: left;
 }
 
+.navbar-default {
+    margin-top:10px;
+}
+.authorlabel, .titlelabel, .idlabel{
+    float:left;
+}
+.author, .title,.id {
+    float:right;
+}
