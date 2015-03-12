@@ -1,0 +1,53 @@
+.container {
+	background-color: #5C99A1;
+}
+.header {
+	font-family: 'Orbitron', Cursive, serif;
+	text-align: center;
+	font-weight: bold;
+    text-align: center;
+    padding-top: 0.5px;
+    height: 70px;
+}
+
+.sidebar {
+	font-family: 'Orbitron', Cursive, serif;
+  	background-color: #EDF6F7;
+    height: 90%;
+    width: 350px;
+    float: right;
+    padding: 5px;
+    margin: 10px;	
+}
+
+.main {
+	font-family: 'Orbitron', Cursive, serif;
+	background-color: #EDF6F7;
+    height: 90%;
+    width: 800px;
+    float: left;
+    padding: 5px;
+    margin: 10px;
+}
+
+.textarea{
+    float: left;
+    clear: left;
+    height: 600px;
+    width: 700px;
+    border-color: black;
+    border-width: 2px;
+}
+
+.editpane{
+    float:right;
+}
+.close{
+    float: left;
+}
+
+.save,.text, .title {
+    float: left;
+    clear: left;
+}
+

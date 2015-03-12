@@ -2,10 +2,11 @@
 var fs = require('fs');
 var url = require("url");
 var db = require('./model.js');
-//var template = require( './jade.js');
+var jade = require("jade");
 
-// var querystring = require('querystring'),
-// 	utils = require('util');
+
+var querystring = require('querystring'),
+	utils = require('util');
 
 // var handleResponse = function( res, responseData ){
 // 	res.writeHead(200, {"Content-Type": responseData.contentType});
@@ -42,32 +43,32 @@ var db = require('./model.js');
 // 		   handleResponse( res, responseData );
 // 		});
 // 	}
-// 	else if( requestType === 'POST' ){
-// 		console.log( "data to post: " + req.body );
+	// else if( requestType === 'POST' ){
+	// 	console.log( "data to post: " + req.body );
 
-// 		var fullBody = '';
+	// 	var fullBody = '';
         
-//         req.on('data', function(chunk) {
-//           // append the current chunk of data to the fullBody variable
-//           fullBody += chunk.toString();
-//         });
+ //        req.on('data', function(chunk) {
+ //          // append the current chunk of data to the fullBody variable
+ //          fullBody += chunk.toString();
+ //        });
         
-//         req.on('end', function() {
-// 	   		fs.readFile('./test/dummy_blogs.json', function(err, data) {
-// 	    		var blogs = JSON.parse( data );
-// 	    		var decodedBody = querystring.parse(fullBody);
-// 	    		blogs.push( decodedBody);
-// 	    		fs.writeFile('./test/dummy_blogs.json', JSON.stringify(blogs, null, 4), function(err) {
-// 	    			responseData = {
-// 								     contentType: 'application/json',
-// 									 data        :  JSON.stringify(blogs)
-// 					   	   			};
-// 	    			handleResponse( res, responseData );
+ //        req.on('end', function() {
+	//    		fs.readFile('./test/dummy_blogs.json', function(err, data) {
+	//     		var blogs = JSON.parse( data );
+	//     		var decodedBody = querystring.parse(fullBody);
+	//     		blogs.push( decodedBody);
+	//     		fs.writeFile('./test/dummy_blogs.json', JSON.stringify(blogs, null, 4), function(err) {
+	//     			responseData = {
+	// 							     contentType: 'application/json',
+	// 								 data        :  JSON.stringify(blogs)
+	// 				   	   			};
+	//     			handleResponse( res, responseData );
 
-// 	   			});	
-// 			});
-//    		});
-// 	}
+	//    			});	
+	// 		});
+ //   		});
+	// }
 
 // }
 
@@ -102,25 +103,95 @@ var db = require('./model.js');
 
 // };
 
+// getSearchData( req, function (fullBody) {
+//    			var decodedBody = querystring.parse(fullBody);
+//    			console.log( 'Query Data: ' + fullBody);
+//    			var post = db.getPosts( {_id : decodedBody.id } );
+//     		var renderedHTML = renderPage( 'blogpost', post );
+//    		});
+function getSearchData( req, processData ) {
+	var fullBody = '';
+        
+    req.on('data', function(chunk) {
+      // append the current chunk of data to the fullBody variable
+      fullBody += chunk.toString();
+      console.log( 'fullBOdy: ' + fullBody );
+    });
+    
+    req.on('end', processData( fullBody ));
+}
 
+function renderPage( whichPage, data ){
+	var path, fn;
+	switch( whichPage ){
+		case "index" :
+			console.log('in case index');
+			path = __dirname + "/templates/index.jade";
+			fn = jade.compileFile(path);
+			break;
+		case "editpage" :
+			path = __dirname + "/templates/edit.jade";
+			fn = jade.compileFile(path);
+			break;
+		case "blogpage" :
+			path = __dirname + "/templates/index.jade";
+			fn = jade.compileFile(path);
+			break;
+		default :
+			console.log( "Dont have a template for: " + whichPage );
+			return;
+	} 
+	if( fn ) {
+		console.log( 'fn exists ');
+		return fn ( { posts : data } );
+	}
+}
+
+function renderPageById( req, pageType, sendResponse ){
+	var reqURL = url.parse( req.url, true );
+	var blog_id = reqURL.query.id;
+	var query = db.getPosts( blog_id );
+	query.exec(function (err, posts) {
+		console.log( 'In blogpage query.exec : ' + posts );
+		sendResponse( renderPage( pageType, posts ) );		
+	});
+}
 module.exports = {
 
-
+	css: function handler(req, res ){
+		fs.readFile("./css/index.css", function(err, contents) {
+	        res.writeHead(200, {"Content-Type": "text/css"});
+	        res.end(contents);
+	    });
+	},
     home: function handler(req, res) {
         // console.log("Request for " + pathname + " received.");
         var query = db.getPosts();//function( blogPosts ) {
-        	query.exec(function (err, posts) {
-        		console.log( 'In query.exec : ' + posts );
-        	
-       			//var renderedPage = template.renderMainPage( posts );
-       			res.writeHead(200, {"Content-Type": "text/plain"});
-	        	// res.write("Welcome");
-	        	// res.end(renderedPage );
-	        	res.end( JSON.stringify( posts ));
-        	});
+    	query.exec(function (err, posts) {
+    		console.log( 'In query.exec : ' + posts );
+    	
+   			var renderedHTML = renderPage( 'index', posts );
+   			console.log("rendreed page:" + renderedHTML);
+   			res.writeHead(200, {"Content-Type": "text/html"});
+        	// res.write("Welcome");
+        	res.end(renderedHTML );
+        	// res.end( JSON.stringify( posts ));
+    	});
         //});
     },
-
+    blogpage: function handler ( req, res ) {
+    	//var url = req.url; //blogpage?id=550034a5baf8cfd514db592d
+    	renderPageById( req, 'blogpage', function( renderedHTML) {
+    		res.writeHead(200, {"Content-Type": "text/html"});
+    		res.end( renderedHTML );
+    	});
+    },
+    editpage: function handler(req, res) {
+    	renderPageById( req, 'editpage', function( renderedHTML) {
+    		res.writeHead(200, {"Content-Type": "text/html"});
+    		res.end( renderedHTML );
+    	});
+    },
     // read: function handler(req, res) {
     //     // console.log("Request for " + pathname + " received.");
 
@@ -161,20 +232,6 @@ module.exports = {
 	    res.writeHead(200, {"Content-Type": "text/plain"});
 	    res.write("Welcome");
 	    res.end(" to delete article");
-
-    },
-    blogpage: function handler(req, res) {
-
-	    res.writeHead(200, {"Content-Type": "text/plain"});
-	    res.write("Welcome");
-	    res.end(" to blogpage");
-
-    },
-    editpage: function handler(req, res) {
-
-	    res.writeHead(200, {"Content-Type": "text/plain"});
-	    res.write("Welcome");
-	    res.end("to editpage");
 
     }
 };

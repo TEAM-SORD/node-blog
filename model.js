@@ -1,13 +1,14 @@
 // Require mongoose and other node modules \\
 var mongoose = require("mongoose");
+var ObjectId = require('mongoose').Types.ObjectId; 
+var uriUtil = require('mongodb-uri');
 var http = require("http");
 var url = require("url");
 var fs = require("fs");
-var uriUtil  = require('mongodb-uri');
 
+// mongoose.connect("mongodb://127.0.0.1:27017/blogpostdb");
 var mongodbUri = 'mongodb://beechware:Pass1on8@ds039301.mongolab.com:39301/sord';
 var mongooseUri = uriUtil.formatMongoose(mongodbUri);
-
 mongoose.connect(mongooseUri);
 
 // Get notification for connection success or failure \\
@@ -34,24 +35,27 @@ blogSchema.methods.announce = function() {
 
 // Compile schema into a model, which defines the database collection \\
 // First argument is collection name, second argument is schema name  \\
-var blogPostModel = mongoose.model("blogPosts", blogSchema);
+var blogPostModel = mongoose.model("blogposts", blogSchema);
 
-console.log( "blogPOPO" + blogPostModel);
-
-
-
-
+function formatID( searchCriteria ) {
+	var query = { _id: new ObjectId(searchCriteria) };
+	return query;
+}
 module.exports = {
 
-	getPosts : function( searchCriteria, doSomethingWithResults ) {
-	    return blogPostModel.find();
-	 //    function(err, blogPosts) {
-		// 	console.log( 'In blogPostModel : ' + blogPosts);
-		// 	if( err ) {
-		// 		console.log( 'Error: ' + err );
-		// 	}
-		// 	doSomethingWithResults( blogPosts );
-		// });
+	getPosts : function( searchCriteria ) {
+		// searchCriteria = { _id : sf184943095043 }
+		if( searchCriteria ) {
+			searchCriteria = formatID( searchCriteria );
+			//collection.update({'_id': o_id});
+		}
+	    return blogPostModel.find( searchCriteria );/*function(err, blogPosts) {
+			console.log( 'In blogPostModel : ' + blogPosts);
+			if( err ) {
+				console.log( 'Error: ' + err );
+			}
+			doSomethingWithResults( blogPosts );
+		});*/
 
 	},
 	addPost  : function( newPost, successCB ) {
@@ -73,17 +77,18 @@ module.exports = {
 	}
 };
 
-// Example blog post 
-var testPost = new blogPostModel({ author : "bob smith",
-							   		title : "read these words", 
-							   		text : "this is some informatioon about an interesting topic of my choice",
-							    	date : "new data object",
-							   		image : "img src ='www.google.com/images/pineapple"
-								});
+// Example blog post \\
+// var testPost = new blogPostModel({ author : "bob smith",
+// 							   title : "read these words", 
+// 							   	text : "this is some informatioon about an interesting topic of my choice",
+// 							    date : "new data object",
+// 							   image : "img src ='www.google.com/images/pineapple"
+// 							});
 
-// Saves submitted blog post to database and displays a message confirming \\
-testPost.save(function(err, testPost){
-	if (err) return console.error(err);
-	testPost.announce();
-});
+// // Saves submitted blog post to database and displays a message confirming \\
+// testPost.save(function(err, testPost){
+// 	if (err) return console.error(err);
+// 	testPost.announce();
+// });
+
 
