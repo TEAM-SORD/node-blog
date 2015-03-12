@@ -1,9 +1,21 @@
-form(action='update', method='POST')
-	label(class='authorlabel') Author:
-		input(class='author' type='text' name='author' value='#{posts[0].author}' required)
-	label(class='titlelabel') Title:
-		input(class='title' type='text' name='title' value='#{posts[0].title}' required)
-	label(class='idlabel') Identifier:
-		input(class='id' type='text' name='id' value='#{posts[0].id}' readonly)
-	textarea(class='textarea' wrap='hard' name='text' required) #{posts[0].text}
-	input(class='save' type='submit' value="Save" )
+if posts
+	form(action='update', method='POST')
+		label(class='authorlabel') Author:
+			input(class='author' type='text' name='author' value='#{posts[0].author}' required)
+		label(class='titlelabel') Title:
+			input(class='title' type='text' name='title' value='#{posts[0].title}' required)
+		label(class='idlabel') Identifier:
+			input(class='id' type='text' name='id' value='#{posts[0].id}' readonly)
+		textarea(class='textarea' wrap='hard' name='text' required) #{posts[0].text}
+		input(class='save' type='submit' value="Save" )
+if !posts
+	form(action='update', method='POST')
+			label(class='authorlabel') Author:
+				input(class='author' type='text' name='author' value='#{posts.author}' required)
+			label(class='titlelabel') Title:
+				input(class='title' type='text' name='title' value='#{posts.title}' required)
+			label(class='idlabel') Identifier:
+				input(class='id' type='text' name='id' value='' readonly)
+			textarea(class='textarea' wrap='hard' name='text' required) #{posts.text}
+			input(class='save' type='submit' value="Save" )
+	

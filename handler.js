@@ -1,7 +1,7 @@
 
 var fs = require('fs');
 var url = require("url");
-var db = require('./model.js');
+var db = require('./posts.js');
 var jade = require("jade");
 
 
@@ -27,89 +27,7 @@ var allPosts = [];
 // 	}
 // }
 
-// function handleJSON( req, requestType, res, pushData ) {
-// 	var responseData;
-// 	if( requestType === 'GET'){
-// 		// fs.exists('./test/dummy_blogs.json', function (exists) {
-// 	 //    	console.log( exists ? "it's there" : "not!");
-// 		// });
-// 		fs.readFile('./test/dummy_blogs.json', function( err, data ) {
-// 			if( err ){
-// 				console.log( "Error: " + err );
-// 			}
-// 			responseData =  {
-// 				     			contentType: 'application/json',
-// 					 			data        : data
-// 				   			};
-// 		   handleResponse( res, responseData );
-// 		});
-// 	}
-	// else if( requestType === 'POST' ){
-	// 	console.log( "data to post: " + req.body );
 
-	// 	var fullBody = '';
-        
- //        req.on('data', function(chunk) {
- //          // append the current chunk of data to the fullBody variable
- //          fullBody += chunk.toString();
- //        });
-        
- //        req.on('end', function() {
-	//    		fs.readFile('./test/dummy_blogs.json', function(err, data) {
-	//     		var blogs = JSON.parse( data );
-	//     		var decodedBody = querystring.parse(fullBody);
-	//     		blogs.push( decodedBody);
-	//     		fs.writeFile('./test/dummy_blogs.json', JSON.stringify(blogs, null, 4), function(err) {
-	//     			responseData = {
-	// 							     contentType: 'application/json',
-	// 								 data        :  JSON.stringify(blogs)
-	// 				   	   			};
-	//     			handleResponse( res, responseData );
-
-	//    			});	
-	// 		});
- //   		});
-	// }
-
-// }
-
-// function route ( req, res, handleResponse ) {
-
-// 	// GET json blogs request
-// 	// GET html string blogs request
-// 	// POST new blog 
-
-// 	// if pathname === '/' then return html string	
-// 	// else if pathname === '/blogs.json'
-// 			// if GET else if POST
-// 	var pathname = url.parse(req.url).pathname;
-//     console.log( "Query: " + url.parse(req.url).query);
-//     var requestFormat = 'json';//url.parse(req.url).query.dataType;
-//     var requestType = req.method;
-//     console.log( "Request Format: " + requestFormat );
-//     console.log( "Request Type: " + requestType );
-// 	if( requestFormat && requestFormat.match(/html/) ){
-// 		 handleHTML( requestType, res );		
-// 	}
-// 	else if( requestFormat && requestFormat.match(/json/) ){
-// 		 handleJSON( req, requestType, res );
-// 	}
-// }
-
-
-// module.exports = function handler(req, res) {
-
-// 	// console.log( req );
-// 	route( req, res );
-
-// };
-
-// getSearchData( req, function (fullBody) {
-//    			var decodedBody = querystring.parse(fullBody);
-//    			console.log( 'Query Data: ' + fullBody);
-//    			var post = db.getPosts( {_id : decodedBody.id } );
-//     		var renderedHTML = renderPage( 'blogpost', post );
-//    		});
 function getSearchData( req, processData ) {
 	var fullBody = '';
         
@@ -204,8 +122,8 @@ function renderPageById( req, pageType, sendResponse ){
 	}
 }
 
-function postOrPut(req, sendResponse){
-	console.log( 'In postOrPut.');
+function insertOrUpdate(req, sendResponse){
+	console.log( 'In insertOrUpdate.');
 	console.log( 'Req.method: ' + req.method );
 
 	var fullBody = '';
@@ -217,9 +135,9 @@ function postOrPut(req, sendResponse){
 	req.on('end', function() {
 		console.log( 'fullBody: ' + fullBody );
 		var decodedBody = querystring.parse(fullBody);
-		console.log( 'DecodedBody: ' + decodedBody );
+		console.log( 'DecodedBody: ' + decodedBody.id );
 		decodedBody.date = new Date();
-		if( fullBody.id ){
+		if( decodedBody.id ){
 			console.log( 'Found id so update.');
 			db.updatePost(decodedBody, function(err, numAffected) {
 				// numAffected is the number of updated documents
@@ -256,8 +174,8 @@ module.exports = {
 	},
     home: function handler(req, res) {
         // console.log("Request for " + pathname + " received.");
-        var query = db.getPosts();//function( blogPosts ) {
-    	query.exec(function (err, posts) {
+        var query = db.getPosts();
+    	query.sort({date: 'descending'}).exec(function (err, posts) {
     		console.log( 'In home handler - query.exec : ' + posts );
     		allPosts = posts;
    			var renderedHTML = renderPage( 'home', { posts : allPosts, postlist: allPosts } );
@@ -269,7 +187,7 @@ module.exports = {
     blogpage: function handler ( req, res ) {
     	//var url = req.url; //blogpage?id=550034a5baf8cfd514db592d
     	var query = db.getPosts();
-		query.exec(function (err, posts) {
+		query.sort({date: 'descending'}).exec(function (err, posts) {
 			allPosts = posts;
 			var reqURL = url.parse( req.url, true );
 			var blog_id = reqURL.query.id;
@@ -288,19 +206,25 @@ module.exports = {
     editpage: function handler(req, res) {
         console.log("Edit Handler called.");
         var query = db.getPosts();
-		query.exec(function (err, posts) {
+		query.sort({date: 'descending'}).exec(function (err, posts) {
 			allPosts = posts;
 			// if( req.method === 'GET') {
 			// 	console.log( 'In GET' );
 			var reqURL = url.parse( req.url, true );
 			var blog_id = reqURL.query.id;
 			console.log( 'Open Edit Page with Blog: ' + blog_id );
-			var query = db.getPosts( blog_id );
-			query.exec(function (err, post) {
-				console.log( 'Post found: ' + post );
+			if( blog_id ) {
+				var query = db.getPosts( blog_id );
+				query.exec(function (err, post) {
+					console.log( 'Post found: ' + post );
+					res.writeHead(200, {"Content-Type": "text/html"});
+	    			res.end( renderPage( 'editpage', { posts : post, postlist: allPosts }));
+	    		});
+    		}
+    		else{
 				res.writeHead(200, {"Content-Type": "text/html"});
-    			res.end( renderPage( 'editpage', { posts : post, postlist: allPosts }));
-    		});
+    			res.end( renderPage( 'editpage', { posts : "", postlist: allPosts }));    			
+    		}
 		});
     	// renderPageById( req, 'editpage', function (renderedHTML) {
     	// 	res.writeHead(200, {"Content-Type": "text/html"});
@@ -311,7 +235,7 @@ module.exports = {
         console.log("Create Handler called.");
        
         var query = db.getPosts();
-		query.exec(function (err, posts) {
+		query.sort({date: 'descending'}).exec(function (err, posts) {
 			console.log( 'In create new post handler query.exec : ' + posts );
 			allPosts = posts;
 			res.writeHead(200, {"Content-Type": "text/html"});
@@ -321,16 +245,17 @@ module.exports = {
     },
 	update: function handler(req, res) {
         console.log("Update Handler called.");
-        var query = db.getPosts();
-		query.exec(function (err, posts) {
-			console.log( 'In update new post handler query.exec : ' + posts );
-			allPosts = posts;
-			//if PUT then do DB update
-			// if POST then do DB insert/add
-			postOrPut( req, function(){
+        
+		//if PUT then do DB update
+		// if POST then do DB insert/add
+		insertOrUpdate( req, function(){
+			var query = db.getPosts();
+			query.sort({date: 'descending'}).exec(function (err, posts) {
+				allPosts = posts;
+
 				res.writeHead(200, {"Content-Type": "text/html"});
-    			res.end( renderPage( 'home', { posts : allPosts, postlist: allPosts }));
-    		});
+				res.end( renderPage( 'home', { posts : allPosts, postlist: allPosts }));
+			});
 		});
     },
     delete: function handler(req, res) {

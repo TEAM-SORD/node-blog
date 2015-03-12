@@ -1,6 +1,6 @@
 // Require mongoose and other node modules \\
 var mongoose = require("mongoose");
-var ObjectId = require('mongoose').Types.ObjectId; 
+var ObjectId = mongoose.Types.ObjectId; 
 var uriUtil = require('mongodb-uri');
 var http = require("http");
 var url = require("url");
@@ -47,7 +47,6 @@ module.exports = {
 		// searchCriteria = { _id : sf184943095043 }
 		if( searchCriteria ) {
 			searchCriteria = formatID( searchCriteria );
-			//collection.update({'_id': o_id});
 		}
 	    return blogPostModel.find( searchCriteria );
 	},
@@ -64,28 +63,14 @@ module.exports = {
 	},
 	updatePost : function( post, successCB ) {
 		var searchCriteria = formatID( post.id );
-		var /*conditions = { _id : 'borne' },*/
-  			 update = post, /*{ $inc: { visits: 1 }}*/
+		var  update = post, 
   			 options = { multi: true };
 
-			blogPostModel.update(conditions, update, options, successCB);
+		blogPostModel.update(searchCriteria, update, options, successCB);
 	},
 	deletePost : function( post ) {
 
 	}
 };
 
-// Example blog post \\
-// var testPost = new blogPostModel({ author : "bob smith",
-// 							   title : "read these words", 
-// 							   	text : "this is some informatioon about an interesting topic of my choice",
-// 							    date : "new data object",
-// 							   image : "img src ='www.google.com/images/pineapple"
-// 							});
-
-// // Saves submitted blog post to database and displays a message confirming \\
-// testPost.save(function(err, testPost){
-// 	if (err) return console.error(err);
-// 	testPost.announce();
-// });
 
