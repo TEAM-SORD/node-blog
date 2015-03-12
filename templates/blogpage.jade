@@ -1,13 +1,10 @@
-html
-	head
-		title SORD NODE Blog
-		link(rel='stylesheet' href='http://fonts.googleapis.com/css?family=Orbitron:400,500,700' type='text/css')
-		link(rel="stylesheet" type='text/css' href="./index.css")
-	body
-		div(class="container")
-			div(class="header")
-				include ./header
-			div(class="sidebar")
-				include ./sidebar
-			div(class="post")
-				include ./post
+div(class="row")
+	div(class="col-sm-8 blog-main")
+		if posts.length = 1
+			each post in posts
+				div(class="blog-post")
+						h2(class="blog-post-title") 
+							a( href="blogpage?id="+post._id) #{post.title}
+						p(class="blog-post-meta") #{post.date} 
+						hr
+						p #{post.text}
