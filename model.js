@@ -13,9 +13,9 @@ mongoose.connect(mongooseUri);
 // Get notification for connection success or failure \\
 var db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error"));
-db.once("open", function (callback) {
-	console.log("connection made");
-});
+// db.once("open", function (callback) {
+// 	console.log("connection made");
+// });
 
 // Define database schema which determines which properties we want to store \\
 var blogSchema = mongoose.Schema({
@@ -75,11 +75,11 @@ module.exports = {
 
 // Example blog post 
 var testPost = new blogPostModel({ author : "bob smith",
-							   title : "read these words", 
-							   	text : "this is some informatioon about an interesting topic of my choice",
-							    date : "new data object",
-							   image : "img src ='www.google.com/images/pineapple"
-							});
+							   		title : "read these words", 
+							   		text : "this is some informatioon about an interesting topic of my choice",
+							    	date : "new data object",
+							   		image : "img src ='www.google.com/images/pineapple"
+								});
 
 // Saves submitted blog post to database and displays a message confirming \\
 testPost.save(function(err, testPost){
