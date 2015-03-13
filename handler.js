@@ -135,33 +135,34 @@ function insertOrUpdate(req, sendResponse){
 	req.on('end', function() {
 		console.log( 'fullBody: ' + fullBody );
 		var decodedBody = querystring.parse(fullBody);
-		console.log( 'DecodedBody: ' + decodedBody.id );
 		decodedBody.date = new Date();
 		if( decodedBody.id ){
 			console.log( 'Found id so update.');
 			db.updatePost(decodedBody, function(err, numAffected) {
 				// numAffected is the number of updated documents
-				if( err ){
-					console.log( 'Error posting to db: ' + err  );
-				}
-				else {
-					console.log( 'Number of posts updated (should be one): ' + numAffected );
-				}
+				console.log( ( err )? 'Error posting to db: ' + err : 'Number of posts updated (1): ' + numAffected );
 				sendResponse();
 			});
 		}
 		else {
 			console.log( 'No id found so insert.');
 			db.addPost(decodedBody, function (err){
-				if( err ) {
-					console.log( 'Error posting to db: ' + err );
-				}
-				else {
-					console.log( 'Successfully added to db');
-				}
+				console.log( ( err )? 'Error posting to db: ' + err : 'Successfully added to db');
 				sendResponse();
 			});
 		}
+	});
+}
+function writeHTMLToResponse( res, renderedHTML ){
+	res.writeHead(200, {"Content-Type": "text/html"});
+	res.end(renderedHTML );
+}
+function getPostsForSideBar( req, res, renderOtherPane ){
+	var query = db.getPosts();
+	query.sort( {date: 'descending'} ).exec( function (err, posts) {
+		console.log( 'In getPostsForSideBar - query.exec : ' + posts );
+		allPosts = posts;
+		renderOtherPane( allPosts );
 	});
 }
 module.exports = {
@@ -173,75 +174,43 @@ module.exports = {
 	    });
 	},
     home: function handler(req, res) {
-        // console.log("Request for " + pathname + " received.");
-        var query = db.getPosts();
-    	query.sort({date: 'descending'}).exec(function (err, posts) {
-    		console.log( 'In home handler - query.exec : ' + posts );
-    		allPosts = posts;
-   			var renderedHTML = renderPage( 'home', { posts : allPosts, postlist: allPosts } );
-   			console.log("rendreed page:" + renderedHTML);
-   			res.writeHead(200, {"Content-Type": "text/html"});
-        	res.end(renderedHTML );
-    	});
+    	console.log("Home page Handler called.");
+    	getPostsForSideBar( req, res, function( allPosts ) {
+    		var renderedHTML = renderPage( 'home', { posts : allPosts, postlist: allPosts } );
+    		writeHTMLToResponse( res, renderedHTML );
+    	} );
     },
     blogpage: function handler ( req, res ) {
-    	//var url = req.url; //blogpage?id=550034a5baf8cfd514db592d
-    	var query = db.getPosts();
-		query.sort({date: 'descending'}).exec(function (err, posts) {
-			allPosts = posts;
-			var reqURL = url.parse( req.url, true );
+    	console.log("BlogPage Handler called.");
+    	getPostsForSideBar( req, res, function( allPosts ) {
+    		var reqURL = url.parse( req.url, true );
 			var blog_id = reqURL.query.id;
 			var query = db.getPosts( blog_id );
 			query.exec(function (err, post) {
-				console.log( 'In blog page handler query.exec : ' + posts );
-				res.writeHead(200, {"Content-Type": "text/html"});
-    			res.end( renderPage( 'blogpage', { posts : post, postlist: allPosts }));
-	    		// renderPageById( req, 'blogpage', function (renderedHTML) {
-	    		// 	res.writeHead(200, {"Content-Type": "text/html"});
-	    		// 	res.end( renderedHTML );
-	    		// });
-	    	});
-		});
+    			var renderedHTML = renderPage( 'blogpage', { posts : post, postlist: allPosts } );
+				writeHTMLToResponse( res, renderedHTML );
+			});
+    	});
     },
     editpage: function handler(req, res) {
         console.log("Edit Handler called.");
-        var query = db.getPosts();
-		query.sort({date: 'descending'}).exec(function (err, posts) {
-			allPosts = posts;
-			// if( req.method === 'GET') {
-			// 	console.log( 'In GET' );
-			var reqURL = url.parse( req.url, true );
-			var blog_id = reqURL.query.id;
-			console.log( 'Open Edit Page with Blog: ' + blog_id );
-			if( blog_id ) {
-				var query = db.getPosts( blog_id );
-				query.exec(function (err, post) {
-					console.log( 'Post found: ' + post );
-					res.writeHead(200, {"Content-Type": "text/html"});
-	    			res.end( renderPage( 'editpage', { posts : post, postlist: allPosts }));
-	    		});
-    		}
-    		else{
-				res.writeHead(200, {"Content-Type": "text/html"});
-    			res.end( renderPage( 'editpage', { posts : "", postlist: allPosts }));    			
-    		}
-		});
-    	// renderPageById( req, 'editpage', function (renderedHTML) {
-    	// 	res.writeHead(200, {"Content-Type": "text/html"});
-    	// 	res.end( renderedHTML );
-    	// });
+        var reqURL = url.parse( req.url, true );
+		var blog_id = reqURL.query.id;	
+        getPostsForSideBar( req, res, function( allPosts ) {    		
+			var query = db.getPosts( blog_id );
+			query.exec(function (err, post) {
+				post = ( blog_id )? post : "";
+    			var renderedHTML = renderPage( 'editpage', { posts : post, postlist: allPosts } );
+				writeHTMLToResponse( res, renderedHTML );
+			});
+    	});
     },
     create: function handler(req, res) {
         console.log("Create Handler called.");
-       
-        var query = db.getPosts();
-		query.sort({date: 'descending'}).exec(function (err, posts) {
-			console.log( 'In create new post handler query.exec : ' + posts );
-			allPosts = posts;
-			res.writeHead(200, {"Content-Type": "text/html"});
-    		res.end( renderPage( 'editpage', { posts : "", postlist: allPosts }));
-		});
-
+        getPostsForSideBar( req, res, function( allPosts ) {
+    		var renderedHTML = renderPage( 'editpage', { posts : "", postlist: allPosts } );
+    		writeHTMLToResponse( res, renderedHTML );
+    	} );
     },
 	update: function handler(req, res) {
         console.log("Update Handler called.");
@@ -249,13 +218,10 @@ module.exports = {
 		//if PUT then do DB update
 		// if POST then do DB insert/add
 		insertOrUpdate( req, function(){
-			var query = db.getPosts();
-			query.sort({date: 'descending'}).exec(function (err, posts) {
-				allPosts = posts;
-
-				res.writeHead(200, {"Content-Type": "text/html"});
-				res.end( renderPage( 'home', { posts : allPosts, postlist: allPosts }));
-			});
+			getPostsForSideBar( req, res, function( allPosts ) {
+    			var renderedHTML = renderPage( 'home', { posts : allPosts, postlist: allPosts } );
+    			writeHTMLToResponse( res, renderedHTML );
+    		});
 		});
     },
     delete: function handler(req, res) {
