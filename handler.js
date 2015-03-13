@@ -1,9 +1,7 @@
-
 var fs = require('fs');
 var url = require("url");
 var db = require('./posts.js');
 var jade = require("jade");
-
 
 var querystring = require('querystring'),
 	utils = require('util');
@@ -69,7 +67,7 @@ function renderPage( whichPage, data ){
 	}
 }
 
-function renderPageById( req, pageType, sendResponse ){
+/*function renderPageById( req, pageType, sendResponse ){
 	var requestType = req.method;
 	console.log( 'request type in renderPageById: ' + requestType );
 	if( requestType === 'GET') {
@@ -121,7 +119,7 @@ function renderPageById( req, pageType, sendResponse ){
 		});
 	}
 }
-
+*/
 function insertOrUpdate(req, sendResponse){
 	console.log( 'In insertOrUpdate.');
 	console.log( 'Req.method: ' + req.method );
@@ -185,8 +183,7 @@ module.exports = {
     	});
     },
     blogpage: function handler ( req, res ) {
-    	//var url = req.url; //blogpage?id=550034a5baf8cfd514db592d
-    	var query = db.getPosts();
+      	var query = db.getPosts();
 		query.sort({date: 'descending'}).exec(function (err, posts) {
 			allPosts = posts;
 			var reqURL = url.parse( req.url, true );
@@ -196,10 +193,6 @@ module.exports = {
 				console.log( 'In blog page handler query.exec : ' + posts );
 				res.writeHead(200, {"Content-Type": "text/html"});
     			res.end( renderPage( 'blogpage', { posts : post, postlist: allPosts }));
-	    		// renderPageById( req, 'blogpage', function (renderedHTML) {
-	    		// 	res.writeHead(200, {"Content-Type": "text/html"});
-	    		// 	res.end( renderedHTML );
-	    		// });
 	    	});
 		});
     },
@@ -208,8 +201,6 @@ module.exports = {
         var query = db.getPosts();
 		query.sort({date: 'descending'}).exec(function (err, posts) {
 			allPosts = posts;
-			// if( req.method === 'GET') {
-			// 	console.log( 'In GET' );
 			var reqURL = url.parse( req.url, true );
 			var blog_id = reqURL.query.id;
 			console.log( 'Open Edit Page with Blog: ' + blog_id );
@@ -226,10 +217,7 @@ module.exports = {
     			res.end( renderPage( 'editpage', { posts : "", postlist: allPosts }));    			
     		}
 		});
-    	// renderPageById( req, 'editpage', function (renderedHTML) {
-    	// 	res.writeHead(200, {"Content-Type": "text/html"});
-    	// 	res.end( renderedHTML );
-    	// });
+    	
     },
     create: function handler(req, res) {
         console.log("Create Handler called.");
