@@ -30,3 +30,4 @@ $ npm install --save
 
  - Use Json Token's for authentication
  - More Tests and Test's first
+ - Archiving blogs
